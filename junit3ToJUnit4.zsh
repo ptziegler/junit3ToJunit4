@@ -6,7 +6,7 @@
 # junit.framework.TestSuite.addTestSuite(clazz);
 #
 
-for ii in **/test/**/*Test(|Base|Case|Suite|Unit).java; do
+for ii in src/**/*Test(|Base|Case|Suite|Unit).java; do
 
     if [[ `grep -m 1 -c "extends *TestCase" ${ii}` -eq 1 ]]; then
         # 'extends TestCase' is problematic because the class (and its sub-classes)
