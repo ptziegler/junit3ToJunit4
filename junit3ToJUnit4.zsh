@@ -6,7 +6,7 @@
 # junit.framework.TestSuite.addTestSuite(clazz);
 #
 
-for ii in src/**/*Test(|Base|Case|Suite|Unit).java; do
+for ii in src/**/*Test(|Base|Case|Suite|Unit|Registry|NoManager|WithManager|Plugin).java; do
     echo ${ii}
 
     if [[ `grep -m 1 -c "extends *TestCase" ${ii}` -eq 1 ]]; then
