@@ -14,8 +14,8 @@ for ii in src/**/*Test(|Base|Case|Suite|Unit).java; do
         # may call methods now inside 'Assert.*'. Replacing these calls is error
         # prone as one may have locally defined methods starting with "assert".
 
-        # Just make these classes extend Assert:
-        sed -i -e "s/[ \t]\+extends *TestCase/ extends Assert/" $ii
+        # Assertions are imported statically
+        sed -i -e "s/[ \t]\+extends *TestCase//" $ii
 
         # But now there is no super.(tearDown|setUp)
         sed -i -r -e "N; s/[ \t]*super\.setUp\(\);//" $ii
@@ -72,5 +72,38 @@ for ii in src/**/*Test(|Base|Case|Suite|Unit).java; do
 
     if [[ `grep -m 1 -c "@Before" $ii` -eq 1 && `grep -m 1 -c "import org.junit.Before;" $ii` -eq 0 ]]; then
         sed -i "0,/package .*;/ s/package .*;/&\nimport org.junit.Before;/1" $ii
+    fi
+
+    # Manage assertions
+    if [[ `grep -m 1 -c "assertEquals" $ii` -eq 1 && `grep -m 1 -c "import static org.junit.Assert.assertEquals;" $ii` -eq 0 ]]; then
+        sed -i "0,/package .*;/ s/package .*;/&\nimport static org.junit.Assert.assertEquals;/1" $ii
+    fi
+
+    if [[ `grep -m 1 -c "assertNotNull" $ii` -eq 1 && `grep -m 1 -c "import static org.junit.Assert.assertNotNull;" $ii` -eq 0 ]]; then
+        sed -i "0,/package .*;/ s/package .*;/&\nimport static org.junit.Assert.assertNotNull;/1" $ii
+    fi
+
+    if [[ `grep -m 1 -c "assertNull" $ii` -eq 1 && `grep -m 1 -c "import static org.junit.Assert.assertNull;" $ii` -eq 0 ]]; then
+        sed -i "0,/package .*;/ s/package .*;/&\nimport static org.junit.Assert.assertNull;/1" $ii
+    fi
+
+    if [[ `grep -m 1 -c "assertFalse" $ii` -eq 1 && `grep -m 1 -c "import static org.junit.Assert.assertFalse;" $ii` -eq 0 ]]; then
+        sed -i "0,/package .*;/ s/package .*;/&\nimport static org.junit.Assert.assertFalse;/1" $ii
+    fi
+
+    if [[ `grep -m 1 -c "assertTrue" $ii` -eq 1 && `grep -m 1 -c "import static org.junit.Assert.assertTrue;" $ii` -eq 0 ]]; then
+        sed -i "0,/package .*;/ s/package .*;/&\nimport static org.junit.Assert.assertTrue;/1" $ii
+    fi
+
+    if [[ `grep -m 1 -c "assertSame" $ii` -eq 1 && `grep -m 1 -c "import static org.junit.Assert.assertSame;" $ii` -eq 0 ]]; then
+        sed -i "0,/package .*;/ s/package .*;/&\nimport static org.junit.Assert.assertSame;/1" $ii
+    fi
+
+    if [[ `grep -m 1 -c "assertNotSame" $ii` -eq 1 && `grep -m 1 -c "import static org.junit.Assert.assertNotSame;" $ii` -eq 0 ]]; then
+        sed -i "0,/package .*;/ s/package .*;/&\nimport static org.junit.Assert.assertNotSame;/1" $ii
+    fi
+
+    if [[ `grep -m 1 -c "fail(.*)" $ii` -eq 1 && `grep -m 1 -c "import static org.junit.Assert.fail;" $ii` -eq 0 ]]; then
+        sed -i "0,/package .*;/ s/package .*;/&\nimport static org.junit.Assert.fail;/1" $ii
     fi
 done
