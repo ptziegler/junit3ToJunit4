@@ -7,6 +7,7 @@
 #
 
 for ii in src/**/*Test(|Base|Case|Suite|Unit).java; do
+    echo ${ii}
 
     if [[ `grep -m 1 -c "extends *TestCase" ${ii}` -eq 1 ]]; then
         # 'extends TestCase' is problematic because the class (and its sub-classes)
