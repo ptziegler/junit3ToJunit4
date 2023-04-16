@@ -37,6 +37,10 @@ for ii in src/**/*Test(|Base|Case|Suite|Unit|Registry|NoManager|WithManager|Plug
 
     sed -i -e "s/import junit.framework.TestSuite;/\/\/ FIXME include in TestSuite @RunWith(Suite.class)@Suite.SuiteClasses(...)/" -e "s/public[ \t]\+static[ \t]\+TestSuite[ \t]suite\(\)/public static Object suite() \/\/ FIXME TestSuite/" $ii
 
+    ### static setUp and tearDown methods and @BeforeClass/@AfterClass annotations
+    sed -i -r ':a;N;$!ba;s/[ \t]*(protected|public) (final )?void test_setUp/  @BeforeClass\n  protected static void setUpClass/g' $ii
+    sed -i -r ':a;N;$!ba;s/[ \t]*(protected|public) (final )?void test_tearDown/  @AfterClass\n  protected static void tearDownClass/g' $ii
+
     ### Annotate @Test/@Before/@After only if they are not present in the class already.
 
     if [[ `grep -m 1 -c "@Test" ${ii}` -eq 0 ]]; then
@@ -61,6 +65,14 @@ for ii in src/**/*Test(|Base|Case|Suite|Unit|Registry|NoManager|WithManager|Plug
     # sed -i ':a;N;$!ba;s/[ \t]*@Test\n[ \t]*@Test/  @Test/g' $ii
     # sed -i ':a;N;$!ba;s/[ \t]*@Before\n*[ \t]*@Before/  @Before/g' $ii
     # sed -i ':a;N;$!ba;s/[ \t]*@After\n[ \t]*@After/  @After/g' $ii
+
+    if [[ `grep -m 1 -c "@BeforeClass" $ii` -eq 1 && `grep -m 1 -c "import org.junit.BeforeClass;" $ii` -eq 0 ]]; then
+        sed -i "0,/package .*;/ s/package .*;/&\n\nimport org.junit.BeforeClass;/1" $ii
+    fi
+
+    if [[ `grep -m 1 -c "@AfterClass" $ii` -eq 1 && `grep -m 1 -c "import org.junit.AfterClass;" $ii` -eq 0 ]]; then
+        sed -i "0,/package .*;/ s/package .*;/&\n\nimport org.junit.AfterClass;/1" $ii
+    fi
 
     if [[ `grep -m 1 -c "@Test" $ii` -eq 1 && `grep -m 1 -c "import org.junit.Test;" $ii` -eq 0 ]]; then
         sed -i "0,/package .*;/ s/package .*;/&\n\nimport org.junit.Test;/1" $ii
