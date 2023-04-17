@@ -35,8 +35,6 @@ for ii in src/**/*Test(|Base|Case|Suite|Unit|Registry|NoManager|WithManager|Plug
         fi
     fi
 
-    sed -i -e "s/import junit.framework.TestSuite;/\/\/ FIXME include in TestSuite @RunWith(Suite.class)@Suite.SuiteClasses(...)/" -e "s/public[ \t]\+static[ \t]\+TestSuite[ \t]suite\(\)/public static Object suite() \/\/ FIXME TestSuite/" $ii
-
     ### static setUp and tearDown methods and @BeforeClass/@AfterClass annotations
     sed -i -r ':a;N;$!ba;s/[ \t]*(protected|public) (final )?void test_setUp/  @BeforeClass\n  protected static void setUpClass/g' $ii
     sed -i -r ':a;N;$!ba;s/[ \t]*(protected|public) (final )?void test_tearDown/  @AfterClass\n  protected static void tearDownClass/g' $ii
@@ -118,4 +116,13 @@ for ii in src/**/*Test(|Base|Case|Suite|Unit|Registry|NoManager|WithManager|Plug
     if [[ `grep -m 1 -c "fail(.*)" $ii` -eq 1 && `grep -m 1 -c "import static org.junit.Assert.fail;" $ii` -eq 0 ]]; then
         sed -i "0,/package .*;/ s/package .*;/&\nimport static org.junit.Assert.fail;/1" $ii
     fi
+done
+
+for ii in src/**/*Tests.java; do
+    echo ${ii}
+
+    ###########################################################
+    #  "Convert" the JUnit3 Test Suites into JUnit4 Test Suites
+
+    sed -i -e "s/import junit.framework.TestSuite;/\/\/ FIXME include in TestSuite @RunWith(Suite.class)@Suite.SuiteClasses(...)/" -e "s/public[ \t]\+static[ \t]\+TestSuite[ \t]suite\(\)/public static Object suite() \/\/ FIXME TestSuite/" $ii
 done
