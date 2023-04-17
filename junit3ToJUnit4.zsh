@@ -125,4 +125,18 @@ for ii in src/**/*Tests.java; do
     #  "Convert" the JUnit3 Test Suites into JUnit4 Test Suites
 
     sed -i -e "s/import junit.framework.TestSuite;/\/\/ FIXME include in TestSuite @RunWith(Suite.class)@Suite.SuiteClasses(...)/" -e "s/public[ \t]\+static[ \t]\+TestSuite[ \t]suite\(\)/public static Object suite() \/\/ FIXME TestSuite/" $ii
+    
+    #########################################################
+    #  Convert the JUnit4 Test Suites into JUnit5 Test Suites
+
+    sed -i -r -e "s/^[ \t]*@RunWith\(Suite\.class\)/@Suite/" $ii
+    sed -i -r -e "s/^[ \t]*@SuiteClasses\(\{/@SelectClasses\(\{/" $ii
+
+    if [[ `grep -m 1 -c "@Suite" $ii` -eq 1 && `grep -m 1 -c "import org.junit.platform.suite.api.Suite;" $ii` -eq 0 ]]; then
+        sed -i "0,/package .*;/ s/package .*;/&\n\nimport org.junit.platform.suite.api.Suite;/1" $ii
+    fi
+    
+    if [[ `grep -m 1 -c "@SelectClasses" $ii` -eq 1 && `grep -m 1 -c "import org.junit.platform.suite.api.SelectClasses;" $ii` -eq 0 ]]; then
+        sed -i "0,/package .*;/ s/package .*;/&\n\nimport org.junit.platform.suite.api.SelectClasses;/1" $ii
+    fi
 done
