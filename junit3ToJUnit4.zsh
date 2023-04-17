@@ -31,8 +31,8 @@ for ii in src/**/*Test(|Base|Case|Suite|Unit|Registry|NoManager|WithManager|Plug
         sed -i -r -e "N; s/[ \t]*super\([[:alpha:]]*\);//" $ii
 
 #        sed -i -r -e "N; s/[ \t]*super\.setUp\(\);//" -i -e "N; s/[ \t]*super\.tearDown..;//" $ii
-        sed -i -r ':a;N;$!ba;s/[ \t]*@Override\n[ \t]*(protected|public) void setUp/  protected void setUp/g' $ii
-        sed -i -r ':a;N;$!ba;s/[ \t]*@Override\n[ \t]*(protected|public) void tearDown/  protected void tearDown/g' $ii
+        sed -i -r ':a;N;$!ba;s/[ \t]*(@Override\n[ \t]*)?(protected|public) void setUp/  protected void setUp/g' $ii
+        sed -i -r ':a;N;$!ba;s/[ \t]*(@Override\n[ \t]*)?(protected|public) void tearDown/  protected void tearDown/g' $ii
         
         ###################
         #  JUnit4 to JUnit5
