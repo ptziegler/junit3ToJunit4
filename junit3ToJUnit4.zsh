@@ -10,12 +10,18 @@ for ii in src/**/*Test(|Base|Case|Suite|Unit|Registry|NoManager|WithManager|Plug
     echo ${ii}
 
     if [[ `grep -m 1 -c "extends *TestCase" ${ii}` -eq 1 ]]; then
+        ###################
+        #  JUnit3 to JUnit4
+    
         # 'extends TestCase' is problematic because the class (and its sub-classes)
         # may call methods now inside 'Assert.*'. Replacing these calls is error
         # prone as one may have locally defined methods starting with "assert".
 
-        # Assertions are imported statically
-        sed -i -e "s/[ \t]\+extends *TestCase//" $ii
+        sed -i -e "s/[ \t]\+extends *TestCase/ extends Assert/" $ii
+        
+        if [[ `grep -m 1 -c "extends Assert" $ii` -eq 1 && `grep -m 1 -c "import org.junit.Assert;" $ii` -eq 0 ]]; then
+            sed -i "0,/package .*;/ s/package .*;/&\n\nimport org.junit.Assert;/1" $ii
+        fi
 
         # But now there is no super.(tearDown|setUp)
         sed -i -r -e "N; s/[ \t]*super\.setUp\(\);//" $ii
@@ -27,11 +33,14 @@ for ii in src/**/*Test(|Base|Case|Suite|Unit|Registry|NoManager|WithManager|Plug
 #        sed -i -r -e "N; s/[ \t]*super\.setUp\(\);//" -i -e "N; s/[ \t]*super\.tearDown..;//" $ii
         sed -i -r ':a;N;$!ba;s/[ \t]*@Override\n[ \t]*(protected|public) void setUp/  protected void setUp/g' $ii
         sed -i -r ':a;N;$!ba;s/[ \t]*@Override\n[ \t]*(protected|public) void tearDown/  protected void tearDown/g' $ii
-
-        if [[ `grep -E -m 1 -c "import (junit.framework|org.junit).Assert;" $ii` -eq 0 ]]; then
-            sed -i -e "s/import[ \t]\+junit.framework.TestCase;/import org.junit.Assert;/" $ii
-        else
-            sed -i -e "s/import junit.framework.TestCase;//" $ii
+        
+        ###################
+        #  JUnit4 to JUnit5
+        
+        sed -i -e "s/[ \t]\+extends Assert/ extends Assertions/" $ii
+        
+        if [[ `grep -m 1 -c "extends Assertions" $ii` -eq 1 && `grep -m 1 -c "import org.junit.jupiter.api.Assertions;" $ii` -eq 0 ]]; then
+            sed -i -e "s/import org.junit.Assert;/import org.junit.jupiter.api.Assertions;/" $ii
         fi
     fi
 
@@ -82,39 +91,6 @@ for ii in src/**/*Test(|Base|Case|Suite|Unit|Registry|NoManager|WithManager|Plug
 
     if [[ `grep -m 1 -c "@Before" $ii` -eq 1 && `grep -m 1 -c "import org.junit.Before;" $ii` -eq 0 ]]; then
         sed -i "0,/package .*;/ s/package .*;/&\nimport org.junit.Before;/1" $ii
-    fi
-
-    # Manage assertions
-    if [[ `grep -m 1 -c "assertEquals" $ii` -eq 1 && `grep -m 1 -c "import static org.junit.Assert.assertEquals;" $ii` -eq 0 ]]; then
-        sed -i "0,/package .*;/ s/package .*;/&\nimport static org.junit.Assert.assertEquals;/1" $ii
-    fi
-
-    if [[ `grep -m 1 -c "assertNotNull" $ii` -eq 1 && `grep -m 1 -c "import static org.junit.Assert.assertNotNull;" $ii` -eq 0 ]]; then
-        sed -i "0,/package .*;/ s/package .*;/&\nimport static org.junit.Assert.assertNotNull;/1" $ii
-    fi
-
-    if [[ `grep -m 1 -c "assertNull" $ii` -eq 1 && `grep -m 1 -c "import static org.junit.Assert.assertNull;" $ii` -eq 0 ]]; then
-        sed -i "0,/package .*;/ s/package .*;/&\nimport static org.junit.Assert.assertNull;/1" $ii
-    fi
-
-    if [[ `grep -m 1 -c "assertFalse" $ii` -eq 1 && `grep -m 1 -c "import static org.junit.Assert.assertFalse;" $ii` -eq 0 ]]; then
-        sed -i "0,/package .*;/ s/package .*;/&\nimport static org.junit.Assert.assertFalse;/1" $ii
-    fi
-
-    if [[ `grep -m 1 -c "assertTrue" $ii` -eq 1 && `grep -m 1 -c "import static org.junit.Assert.assertTrue;" $ii` -eq 0 ]]; then
-        sed -i "0,/package .*;/ s/package .*;/&\nimport static org.junit.Assert.assertTrue;/1" $ii
-    fi
-
-    if [[ `grep -m 1 -c "assertSame" $ii` -eq 1 && `grep -m 1 -c "import static org.junit.Assert.assertSame;" $ii` -eq 0 ]]; then
-        sed -i "0,/package .*;/ s/package .*;/&\nimport static org.junit.Assert.assertSame;/1" $ii
-    fi
-
-    if [[ `grep -m 1 -c "assertNotSame" $ii` -eq 1 && `grep -m 1 -c "import static org.junit.Assert.assertNotSame;" $ii` -eq 0 ]]; then
-        sed -i "0,/package .*;/ s/package .*;/&\nimport static org.junit.Assert.assertNotSame;/1" $ii
-    fi
-
-    if [[ `grep -m 1 -c "fail(.*)" $ii` -eq 1 && `grep -m 1 -c "import static org.junit.Assert.fail;" $ii` -eq 0 ]]; then
-        sed -i "0,/package .*;/ s/package .*;/&\nimport static org.junit.Assert.fail;/1" $ii
     fi
 done
 
