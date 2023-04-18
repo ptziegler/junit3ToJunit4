@@ -103,6 +103,33 @@ for ii in src/**/*Test(|Base|Case|Suite|Unit|Registry|NoManager|WithManager|Plug
     if [[ `grep -m 1 -c "@Before" $ii` -eq 1 && `grep -m 1 -c "import org.junit.Before;" $ii` -eq 0 ]]; then
         sed -i "0,/package .*;/ s/package .*;/&\nimport org.junit.Before;/1" $ii
     fi
+
+    ###################
+    #  JUnit4 to JUnit5
+
+    sed -i -r -e "s/^import org.junit.Test;/import org.junit.jupiter.api.Test;/" $ii
+
+    if [[ `grep -m 1 -c "@BeforeEach" ${ii}` -eq 0 ]]; then
+        sed -i -r -e "s/^  @Before$/  @BeforeEach/" $ii
+        sed -i -r -e "s/^import org.junit.Before;/import org.junit.jupiter.api.BeforeEach;/" $ii
+    fi
+
+    if [[ `grep -m 1 -c "@AfterEach" ${ii}` -eq 0 ]]; then
+        sed -i -r -e "s/^  @After$/  @AfterEach/" $ii
+        sed -i -r -e "s/^import org.junit.After;/import org.junit.jupiter.api.AfterEach;/" $ii
+    fi
+
+    if [[ `grep -m 1 -c "@BeforeAll" ${ii}` -eq 0 ]]; then
+        sed -i -r -e "s/^  @BeforeClass/  @BeforeAll/" $ii
+        sed -i -r -e "s/^  @BeforeClass/  @BeforeAll/" $ii
+        sed -i -r -e "s/^  protected static void setUpClass/  protected static void setUpAll/" $ii
+    fi
+
+    if [[ `grep -m 1 -c "@AfterAll" ${ii}` -eq 0 ]]; then
+        sed -i -r -e "s/^  @AfterClass/  @AfterAll/" $ii
+        sed -i -r -e "s/^  @BeforeClass/  @BeforeAll/" $ii
+        sed -i -r -e "s/^  protected static void tearDownClass/  protected static void tearDownAll/" $ii
+    fi
 done
 
 for ii in src/**/*Tests.java; do
