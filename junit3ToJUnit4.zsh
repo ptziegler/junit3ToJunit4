@@ -44,11 +44,14 @@ for ii in src/**/*Test(|Base|Case|Suite|Unit|Registry|NoManager|WithManager|Plug
         fi
     fi
 
-    ### static setUp and tearDown methods and @BeforeClass/@AfterClass annotations
-    sed -i -r ':a;N;$!ba;s/[ \t]*(protected|public) (final )?void test_setUp/  @BeforeClass\n  protected static void setUpClass/g' $ii
-    sed -i -r ':a;N;$!ba;s/[ \t]*(protected|public) (final )?void test_tearDown/  @AfterClass\n  protected static void tearDownClass/g' $ii
+    ###################
+    #  JUnit3 to JUnit4
 
-    ### Annotate @Test/@Before/@After only if they are not present in the class already.
+    # Rename test_setUp and test_tearDown because they're not test cases
+    sed -i -r ':a;N;$!ba;s/[ \t]*(protected|public) (final )?void test_setUp/  protected static void setUpClass/g' $ii
+    sed -i -r ':a;N;$!ba;s/[ \t]*(protected|public) (final )?void test_tearDown/  protected static void tearDownClass/g' $ii
+
+    ### Annotate @BeforeClass/@AfterClass/@Test/@Before/@After only if they are not present in the class already.
 
     if [[ `grep -m 1 -c "@Test" ${ii}` -eq 0 ]]; then
         sed -i -e "s/^[ \t]*public[ \t]\+void[ \t]\+test/  @Test\n&/" $ii
@@ -59,6 +62,14 @@ for ii in src/**/*Test(|Base|Case|Suite|Unit|Registry|NoManager|WithManager|Plug
     fi
     if [[ `grep -m 1 -c "@After" ${ii}` -eq 0 ]]; then
         sed -i -r -e "s/^[ \t]*(protected|public)[ \t]+void[ \t]+tearDown\(\)/  @After\n  public void tearDown()/" $ii
+    fi
+
+    if [[ `grep -m 1 -c "@BeforeClass" ${ii}` -eq 0 ]]; then
+        sed -i -r -e "s/^[ \t]*protected static void setUpClass\(\)/  @BeforeClass\n  protected static void setUpClass()/" $ii
+    fi
+
+    if [[ `grep -m 1 -c "@AfterClass" ${ii}` -eq 0 ]]; then
+        sed -i -r -e "s/^[ \t]*protected static void tearDownClass\(\)/  @AfterClass\n  protected static void tearDownClass()/" $ii
     fi
 
     # Fix AssertionFailedError exception handling --> java.lang.AssertionError
