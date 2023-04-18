@@ -153,7 +153,21 @@ for ii in src/**/*Tests.java; do
     ###########################################################
     #  "Convert" the JUnit3 Test Suites into JUnit4 Test Suites
 
-    sed -i -e "s/import junit.framework.TestSuite;/\/\/ FIXME include in TestSuite @RunWith(Suite.class)@Suite.SuiteClasses(...)/" -e "s/public[ \t]\+static[ \t]\+TestSuite[ \t]suite\(\)/public static Object suite() \/\/ FIXME TestSuite/" $ii
+    if [[ `grep -m 1 -c "public static Test suite()" ${ii}` -eq 1 ]]; then
+        sed -i -r -e "s/^[ \t]*public class (\w+) (extends .*)?/  @RunWith(Suite.class)\n@SuiteClasses({\n    \/\/ FIXME include in TestSuite\n})\npublic class \1/" $ii
+        
+        if [[ `grep -m 1 -c "@RunWith(Suite.class)" $ii` -eq 1 && `grep -m 1 -c "import org.junit.RunWith;" $ii` -eq 0 ]]; then
+            sed -i "0,/package .*;/ s/package .*;/&\n\nimport org.junit.RunWith;/1" $ii
+        fi
+        
+        if [[ `grep -m 1 -c "@RunWith(Suite.class)" $ii` -eq 1 && `grep -m 1 -c "import org.junit.Suite;" $ii` -eq 0 ]]; then
+            sed -i "0,/package .*;/ s/package .*;/&\n\nimport org.junit.Suite;/1" $ii
+        fi
+        
+        if [[ `grep -m 1 -c "@SuiteClass" $ii` -eq 1 && `grep -m 1 -c "import org.junit.Suite.SuiteClass;" $ii` -eq 0 ]]; then
+            sed -i "0,/package .*;/ s/package .*;/&\n\nimport org.junit.Suite.SuiteClass;/1" $ii
+        fi
+    fi
     
     #########################################################
     #  Convert the JUnit4 Test Suites into JUnit5 Test Suites
@@ -161,11 +175,11 @@ for ii in src/**/*Tests.java; do
     sed -i -r -e "s/^[ \t]*@RunWith\(Suite\.class\)/@Suite/" $ii
     sed -i -r -e "s/^[ \t]*@SuiteClasses\(\{/@SelectClasses\(\{/" $ii
 
-    if [[ `grep -m 1 -c "@Suite" $ii` -eq 1 && `grep -m 1 -c "import org.junit.platform.suite.api.Suite;" $ii` -eq 0 ]]; then
-        sed -i "0,/package .*;/ s/package .*;/&\n\nimport org.junit.platform.suite.api.Suite;/1" $ii
-    fi
-    
     if [[ `grep -m 1 -c "@SelectClasses" $ii` -eq 1 && `grep -m 1 -c "import org.junit.platform.suite.api.SelectClasses;" $ii` -eq 0 ]]; then
-        sed -i "0,/package .*;/ s/package .*;/&\n\nimport org.junit.platform.suite.api.SelectClasses;/1" $ii
+        sed -i -r -e "s/^import org.junit.runners.Suite.SuiteClasses;/import org.junit.platform.suite.api.SelectClasses;/" $ii
+    fi
+
+    if [[ `grep -m 1 -c "@Suite" $ii` -eq 1 && `grep -m 1 -c "import org.junit.platform.suite.api.Suite;" $ii` -eq 0 ]]; then
+        sed -i -r -e "s/^import org.junit.runners.Suite;/import org.junit.platform.suite.api.Suite;/" $ii
     fi
 done
