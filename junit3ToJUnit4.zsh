@@ -46,6 +46,12 @@ for ii in src/**/*Test(|Base|Case|Suite|Unit|Registry|NoManager|WithManager|Plug
 
     ###################
     #  JUnit3 to JUnit4
+    
+    # Disabled test cases either start with DISABLE_ or DISABLED_. This prefix
+    # should be removed and be replaced by the @Ignore annotation
+    
+    sed -i -r ':a;N;$!ba;s/[ \t]*(protected|public) void DISABLE_test/  @Ignore\n  public void test/g' $ii
+    sed -i -r ':a;N;$!ba;s/[ \t]*(protected|public) void DISABLED_test/  @Ignore\n  public void test/g' $ii
 
     # Rename test_setUp and test_tearDown because they're not test cases
     sed -i -r ':a;N;$!ba;s/[ \t]*(protected|public) (final )?void test_setUp/  protected static void setUpClass/g' $ii
@@ -104,6 +110,10 @@ for ii in src/**/*Test(|Base|Case|Suite|Unit|Registry|NoManager|WithManager|Plug
         sed -i "0,/package .*;/ s/package .*;/&\nimport org.junit.Before;/1" $ii
     fi
 
+    if [[ `grep -m 1 -c "@Ignore" $ii` -eq 1 && `grep -m 1 -c "import org.junit.Ignore;" $ii` -eq 0 ]]; then
+        sed -i "0,/package .*;/ s/package .*;/&\nimport org.junit.Ignore;/1" $ii
+    fi
+
     ###################
     #  JUnit4 to JUnit5
 
@@ -129,6 +139,11 @@ for ii in src/**/*Test(|Base|Case|Suite|Unit|Registry|NoManager|WithManager|Plug
         sed -i -r -e "s/^  @AfterClass/  @AfterAll/" $ii
         sed -i -r -e "s/^  @BeforeClass/  @BeforeAll/" $ii
         sed -i -r -e "s/^  protected static void tearDownClass/  protected static void tearDownAll/" $ii
+    fi
+
+    if [[ `grep -m 1 -c "@Ignore" ${ii}` -eq 0 ]]; then
+        sed -i -r -e "s/^  @Ignore/  @Disabled/" $ii
+        sed -i -r -e "s/^import org.junit.Ignore;/import org.junit.jupiter.api.Disabled;/" $ii
     fi
 done
 
