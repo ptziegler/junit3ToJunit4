@@ -6,7 +6,7 @@
 # junit.framework.TestSuite.addTestSuite(clazz);
 #
 
-for ii in src/**/*Test(|Base|Case|Suite|Unit|Registry|NoManager|WithManager|Plugin).java; do
+for ii in src/**/*Test(|s|Base|Case|Suite|Unit|Registry|NoManager|WithManager|Plugin).java; do
     echo ${ii}
 
     if [[ `grep -m 1 -c "extends *TestCase" ${ii}` -eq 1 ]]; then
@@ -33,15 +33,6 @@ for ii in src/**/*Test(|Base|Case|Suite|Unit|Registry|NoManager|WithManager|Plug
 #        sed -i -r -e "N; s/[ \t]*super\.setUp\(\);//" -i -e "N; s/[ \t]*super\.tearDown..;//" $ii
         sed -i -r ':a;N;$!ba;s/[ \t]*(@Override\n[ \t]*)?(protected|public) void setUp/\tprotected void setUp/g' $ii
         sed -i -r ':a;N;$!ba;s/[ \t]*(@Override\n[ \t]*)?(protected|public) void tearDown/\tprotected void tearDown/g' $ii
-        
-        ###################
-        #  JUnit4 to JUnit5
-        
-        sed -i -e "s/[ \t]\+extends Assert/ extends Assertions/" $ii
-        
-        if [[ `grep -m 1 -c "extends Assertions" $ii` -eq 1 && `grep -m 1 -c "import org.junit.jupiter.api.Assertions;" $ii` -eq 0 ]]; then
-            sed -i -e "s/import org.junit.Assert;/import org.junit.jupiter.api.Assertions;/" $ii
-        fi
     fi
 
     ###################
@@ -113,38 +104,6 @@ for ii in src/**/*Test(|Base|Case|Suite|Unit|Registry|NoManager|WithManager|Plug
     if [[ `grep -m 1 -c "@Ignore" $ii` -eq 1 && `grep -m 1 -c "import org.junit.Ignore;" $ii` -eq 0 ]]; then
         sed -i "0,/package .*;/ s/package .*;/&\nimport org.junit.Ignore;/1" $ii
     fi
-
-    ###################
-    #  JUnit4 to JUnit5
-
-    sed -i -r -e "s/^import org.junit.Test;/import org.junit.jupiter.api.Test;/" $ii
-
-    if [[ `grep -m 1 -c "@BeforeEach" ${ii}` -eq 0 ]]; then
-        sed -i -r -e "s/^\t@Before$/\t@BeforeEach/" $ii
-        sed -i -r -e "s/^import org.junit.Before;/import org.junit.jupiter.api.BeforeEach;/" $ii
-    fi
-
-    if [[ `grep -m 1 -c "@AfterEach" ${ii}` -eq 0 ]]; then
-        sed -i -r -e "s/^\t@After$/\t@AfterEach/" $ii
-        sed -i -r -e "s/^import org.junit.After;/import org.junit.jupiter.api.AfterEach;/" $ii
-    fi
-
-    if [[ `grep -m 1 -c "@BeforeAll" ${ii}` -eq 0 ]]; then
-        sed -i -r -e "s/^\t@BeforeClass/\t@BeforeAll/" $ii
-        sed -i -r -e "s/^\t@BeforeClass/\t@BeforeAll/" $ii
-        sed -i -r -e "s/^\tprotected static void setUpClass/\tprotected static void setUpAll/" $ii
-    fi
-
-    if [[ `grep -m 1 -c "@AfterAll" ${ii}` -eq 0 ]]; then
-        sed -i -r -e "s/^\t@AfterClass/\t@AfterAll/" $ii
-        sed -i -r -e "s/^\t@BeforeClass/\t@BeforeAll/" $ii
-        sed -i -r -e "s/^\tprotected static void tearDownClass/\tprotected static void tearDownAll/" $ii
-    fi
-
-    if [[ `grep -m 1 -c "@Ignore" ${ii}` -eq 0 ]]; then
-        sed -i -r -e "s/^\t@Ignore/\t@Disabled/" $ii
-        sed -i -r -e "s/^import org.junit.Ignore;/import org.junit.jupiter.api.Disabled;/" $ii
-    fi
 done
 
 for ii in src/**/*Tests.java; do
@@ -167,19 +126,5 @@ for ii in src/**/*Tests.java; do
         if [[ `grep -m 1 -c "@SuiteClass" $ii` -eq 1 && `grep -m 1 -c "import org.junit.Suite.SuiteClass;" $ii` -eq 0 ]]; then
             sed -i "0,/package .*;/ s/package .*;/&\n\nimport org.junit.Suite.SuiteClass;/1" $ii
         fi
-    fi
-    
-    #########################################################
-    #  Convert the JUnit4 Test Suites into JUnit5 Test Suites
-
-    sed -i -r -e "s/^[ \t]*@RunWith\(Suite\.class\)/@Suite/" $ii
-    sed -i -r -e "s/^[ \t]*@SuiteClasses\(\{/@SelectClasses\(\{/" $ii
-
-    if [[ `grep -m 1 -c "@SelectClasses" $ii` -eq 1 && `grep -m 1 -c "import org.junit.platform.suite.api.SelectClasses;" $ii` -eq 0 ]]; then
-        sed -i -r -e "s/^import org.junit.runners.Suite.SuiteClasses;/import org.junit.platform.suite.api.SelectClasses;/" $ii
-    fi
-
-    if [[ `grep -m 1 -c "@Suite" $ii` -eq 1 && `grep -m 1 -c "import org.junit.platform.suite.api.Suite;" $ii` -eq 0 ]]; then
-        sed -i -r -e "s/^import org.junit.runners.Suite;/import org.junit.platform.suite.api.Suite;/" $ii
     fi
 done
