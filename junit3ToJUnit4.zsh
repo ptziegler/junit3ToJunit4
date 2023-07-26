@@ -31,8 +31,8 @@ for ii in src/**/*Test(|Base|Case|Suite|Unit|Registry|NoManager|WithManager|Plug
         sed -i -r -e "N; s/[ \t]*super\([[:alpha:]]*\);//" $ii
 
 #        sed -i -r -e "N; s/[ \t]*super\.setUp\(\);//" -i -e "N; s/[ \t]*super\.tearDown..;//" $ii
-        sed -i -r ':a;N;$!ba;s/[ \t]*(@Override\n[ \t]*)?(protected|public) void setUp/  protected void setUp/g' $ii
-        sed -i -r ':a;N;$!ba;s/[ \t]*(@Override\n[ \t]*)?(protected|public) void tearDown/  protected void tearDown/g' $ii
+        sed -i -r ':a;N;$!ba;s/[ \t]*(@Override\n[ \t]*)?(protected|public) void setUp/\tprotected void setUp/g' $ii
+        sed -i -r ':a;N;$!ba;s/[ \t]*(@Override\n[ \t]*)?(protected|public) void tearDown/\tprotected void tearDown/g' $ii
         
         ###################
         #  JUnit4 to JUnit5
@@ -50,32 +50,32 @@ for ii in src/**/*Test(|Base|Case|Suite|Unit|Registry|NoManager|WithManager|Plug
     # Disabled test cases either start with DISABLE_ or DISABLED_. This prefix
     # should be removed and be replaced by the @Ignore annotation
     
-    sed -i -r ':a;N;$!ba;s/[ \t]*(protected|public) void DISABLE_test/  @Ignore\n  public void test/g' $ii
-    sed -i -r ':a;N;$!ba;s/[ \t]*(protected|public) void DISABLED_test/  @Ignore\n  public void test/g' $ii
+    sed -i -r ':a;N;$!ba;s/[ \t]*(protected|public) void DISABLE_test/\t@Ignore\n\tpublic void test/g' $ii
+    sed -i -r ':a;N;$!ba;s/[ \t]*(protected|public) void DISABLED_test/\t@Ignore\n\tpublic void test/g' $ii
 
     # Rename test_setUp and test_tearDown because they're not test cases
-    sed -i -r ':a;N;$!ba;s/[ \t]*(protected|public) (final )?void test_setUp/  protected static void setUpClass/g' $ii
-    sed -i -r ':a;N;$!ba;s/[ \t]*(protected|public) (final )?void test_tearDown/  protected static void tearDownClass/g' $ii
+    sed -i -r ':a;N;$!ba;s/[ \t]*(protected|public) (final )?void test_setUp/\tprotected static void setUpClass/g' $ii
+    sed -i -r ':a;N;$!ba;s/[ \t]*(protected|public) (final )?void test_tearDown/\tprotected static void tearDownClass/g' $ii
 
     ### Annotate @BeforeClass/@AfterClass/@Test/@Before/@After only if they are not present in the class already.
 
     if [[ `grep -m 1 -c "@Test" ${ii}` -eq 0 ]]; then
-        sed -i -e "s/^[ \t]*public[ \t]\+void[ \t]\+test/  @Test\n&/" $ii
+        sed -i -e "s/^[ \t]*public[ \t]\+void[ \t]\+test/\t@Test\n&/" $ii
     fi
 
     if [[ `grep -m 1 -c "@Before" ${ii}` -eq 0 ]]; then
-        sed -i -r -e "s/^[ \t]*(protected|public)[ \t]+void[ \t]+setUp\(\)/  @Before\n  public void setUp()/" $ii
+        sed -i -r -e "s/^[ \t]*(protected|public)[ \t]+void[ \t]+setUp\(\)/\t@Before\n\tpublic void setUp()/" $ii
     fi
     if [[ `grep -m 1 -c "@After" ${ii}` -eq 0 ]]; then
-        sed -i -r -e "s/^[ \t]*(protected|public)[ \t]+void[ \t]+tearDown\(\)/  @After\n  public void tearDown()/" $ii
+        sed -i -r -e "s/^[ \t]*(protected|public)[ \t]+void[ \t]+tearDown\(\)/\t@After\n\tpublic void tearDown()/" $ii
     fi
 
     if [[ `grep -m 1 -c "@BeforeClass" ${ii}` -eq 0 ]]; then
-        sed -i -r -e "s/^[ \t]*protected static void setUpClass\(\)/  @BeforeClass\n  protected static void setUpClass()/" $ii
+        sed -i -r -e "s/^[ \t]*protected static void setUpClass\(\)/\t@BeforeClass\n\tprotected static void setUpClass()/" $ii
     fi
 
     if [[ `grep -m 1 -c "@AfterClass" ${ii}` -eq 0 ]]; then
-        sed -i -r -e "s/^[ \t]*protected static void tearDownClass\(\)/  @AfterClass\n  protected static void tearDownClass()/" $ii
+        sed -i -r -e "s/^[ \t]*protected static void tearDownClass\(\)/\t@AfterClass\n\tprotected static void tearDownClass()/" $ii
     fi
 
     # Fix AssertionFailedError exception handling --> java.lang.AssertionError
@@ -120,29 +120,29 @@ for ii in src/**/*Test(|Base|Case|Suite|Unit|Registry|NoManager|WithManager|Plug
     sed -i -r -e "s/^import org.junit.Test;/import org.junit.jupiter.api.Test;/" $ii
 
     if [[ `grep -m 1 -c "@BeforeEach" ${ii}` -eq 0 ]]; then
-        sed -i -r -e "s/^  @Before$/  @BeforeEach/" $ii
+        sed -i -r -e "s/^\t@Before$/\t@BeforeEach/" $ii
         sed -i -r -e "s/^import org.junit.Before;/import org.junit.jupiter.api.BeforeEach;/" $ii
     fi
 
     if [[ `grep -m 1 -c "@AfterEach" ${ii}` -eq 0 ]]; then
-        sed -i -r -e "s/^  @After$/  @AfterEach/" $ii
+        sed -i -r -e "s/^\t@After$/\t@AfterEach/" $ii
         sed -i -r -e "s/^import org.junit.After;/import org.junit.jupiter.api.AfterEach;/" $ii
     fi
 
     if [[ `grep -m 1 -c "@BeforeAll" ${ii}` -eq 0 ]]; then
-        sed -i -r -e "s/^  @BeforeClass/  @BeforeAll/" $ii
-        sed -i -r -e "s/^  @BeforeClass/  @BeforeAll/" $ii
-        sed -i -r -e "s/^  protected static void setUpClass/  protected static void setUpAll/" $ii
+        sed -i -r -e "s/^\t@BeforeClass/\t@BeforeAll/" $ii
+        sed -i -r -e "s/^\t@BeforeClass/\t@BeforeAll/" $ii
+        sed -i -r -e "s/^\tprotected static void setUpClass/\tprotected static void setUpAll/" $ii
     fi
 
     if [[ `grep -m 1 -c "@AfterAll" ${ii}` -eq 0 ]]; then
-        sed -i -r -e "s/^  @AfterClass/  @AfterAll/" $ii
-        sed -i -r -e "s/^  @BeforeClass/  @BeforeAll/" $ii
-        sed -i -r -e "s/^  protected static void tearDownClass/  protected static void tearDownAll/" $ii
+        sed -i -r -e "s/^\t@AfterClass/\t@AfterAll/" $ii
+        sed -i -r -e "s/^\t@BeforeClass/\t@BeforeAll/" $ii
+        sed -i -r -e "s/^\tprotected static void tearDownClass/\tprotected static void tearDownAll/" $ii
     fi
 
     if [[ `grep -m 1 -c "@Ignore" ${ii}` -eq 0 ]]; then
-        sed -i -r -e "s/^  @Ignore/  @Disabled/" $ii
+        sed -i -r -e "s/^\t@Ignore/\t@Disabled/" $ii
         sed -i -r -e "s/^import org.junit.Ignore;/import org.junit.jupiter.api.Disabled;/" $ii
     fi
 done
