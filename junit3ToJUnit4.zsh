@@ -113,18 +113,18 @@ for ii in src/**/*Tests.java; do
     #  "Convert" the JUnit3 Test Suites into JUnit4 Test Suites
 
     if [[ `grep -m 1 -c "public static Test suite()" ${ii}` -eq 1 ]]; then
-        sed -i -r -e "s/^[ \t]*public class (\w+) (extends .*)?/  @RunWith(Suite.class)\n@SuiteClasses({\n    \/\/ FIXME include in TestSuite\n})\npublic class \1/" $ii
+        sed -i -r -e "s/^[ \t]*public class (\w+) (extends .*)?/\t@RunWith(Suite.class)\n@SuiteClasses({\n\t\t\/\/ FIXME include in TestSuite\n})\npublic class \1/" $ii
         
         if [[ `grep -m 1 -c "@RunWith(Suite.class)" $ii` -eq 1 && `grep -m 1 -c "import org.junit.RunWith;" $ii` -eq 0 ]]; then
-            sed -i "0,/package .*;/ s/package .*;/&\n\nimport org.junit.RunWith;/1" $ii
+            sed -i "0,/package .*;/ s/package .*;/&\n\nimport org.junit.runner.RunWith;/1" $ii
         fi
         
         if [[ `grep -m 1 -c "@RunWith(Suite.class)" $ii` -eq 1 && `grep -m 1 -c "import org.junit.Suite;" $ii` -eq 0 ]]; then
-            sed -i "0,/package .*;/ s/package .*;/&\n\nimport org.junit.Suite;/1" $ii
+            sed -i "0,/package .*;/ s/package .*;/&\n\nimport org.junit.runners.Suite;/1" $ii
         fi
         
-        if [[ `grep -m 1 -c "@SuiteClass" $ii` -eq 1 && `grep -m 1 -c "import org.junit.Suite.SuiteClass;" $ii` -eq 0 ]]; then
-            sed -i "0,/package .*;/ s/package .*;/&\n\nimport org.junit.Suite.SuiteClass;/1" $ii
+        if [[ `grep -m 1 -c "@SuiteClasses" $ii` -eq 1 && `grep -m 1 -c "import org.junit.Suite.SuiteClass;" $ii` -eq 0 ]]; then
+            sed -i "0,/package .*;/ s/package .*;/&\n\nimport org.junit.runners.Suite.SuiteClasses;/1" $ii
         fi
     fi
 done
