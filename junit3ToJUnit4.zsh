@@ -62,11 +62,11 @@ for ii in src/**/*Test(|s|Base|Case|Suite|Unit|Registry|NoManager|WithManager|Pl
     fi
 
     if [[ `grep -m 1 -c "@BeforeClass" ${ii}` -eq 0 ]]; then
-        sed -i -r -e "s/^[ \t]*protected static void setUpClass\(\)/\t@BeforeClass\n\tprotected static void setUpClass()/" $ii
+        sed -i -r -e "s/^[ \t]*protected static void setUpClass\(\)/\t@BeforeClass\n\public static void setUpClass()/" $ii
     fi
 
     if [[ `grep -m 1 -c "@AfterClass" ${ii}` -eq 0 ]]; then
-        sed -i -r -e "s/^[ \t]*protected static void tearDownClass\(\)/\t@AfterClass\n\tprotected static void tearDownClass()/" $ii
+        sed -i -r -e "s/^[ \t]*punliv static void tearDownClass\(\)/\t@AfterClass\n\public static void tearDownClass()/" $ii
     fi
 
     # Fix AssertionFailedError exception handling --> java.lang.AssertionError
